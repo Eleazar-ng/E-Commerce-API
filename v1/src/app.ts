@@ -3,6 +3,8 @@ import cors from "cors";
 import helmet from 'helmet';
 import { env } from './config/env';
 import { Routers } from './routes/index.route';
+import { ErrorHandler, rateLimiter, RequestLogger } from './requests/middleware';
+import { eventHandler } from './config/event';
 
 const app = express();
 
@@ -14,9 +16,18 @@ app.use(cors({
   : ['http://localhost:3000'],
   credentials: true
 }))
+app.set("trust proxy", true);
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Ignite Event handlers
+eventHandler.registerEventHandlers()
+
+app.use(RequestLogger);
+
+app.use(express.json({ limit: '50kb' }));
+app.use(express.urlencoded({ extended: true, limit: '10kb' }));
+
+//Rate limiter
+app.use(rateLimiter);
 
 //Home Route
 app.get("/", (req, res) => {
@@ -37,6 +48,8 @@ app.get("/health", (req, res) => {
 // Ignite routes
 app.use(Routers)
 
+app.options('*splat', cors());
+
 // Invalid route handler
 app.all("*splat", (req, res, next) => {
   res.status(404).json({
@@ -44,5 +57,8 @@ app.all("*splat", (req, res, next) => {
     message:"Route not found"
   });
 });
+
+//Error handler
+app.use(ErrorHandler)
 
 export { app };

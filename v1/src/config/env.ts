@@ -13,6 +13,8 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(32),
   JWT_EXPIRES_IN: z.string().default('1d'),
   APP_URL: z.string().max(8),
+  RE_API_KEY: z.string().max(100),
+  EMAIL_SENDER: z.string().max(50)
 })
 
 export const env = envSchema.parse(process.env);
