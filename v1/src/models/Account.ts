@@ -15,7 +15,6 @@ const accountSchema: Schema = new Schema<IAccount>({
     type: String,
     required: [true, 'Please provide a password'],
     minlength: [8, 'Password must be at least 8 characters'],
-    select: false
   },
   accountType: {
     type: String,
@@ -44,6 +43,12 @@ const accountSchema: Schema = new Schema<IAccount>({
 //Indexes
 accountSchema.index({ email: 1}, {unique: true});
 accountSchema.index({ accountType: 1 });
+
+// Methods
+accountSchema.methods.comparePassword = async function(candidatePassword: string): Promise<boolean> {
+  const password:any = this.password
+  return await bcrypt.compare(candidatePassword, password);
+};
 
 // Hash password before saving
 accountSchema.pre('save', async function() {

@@ -4,7 +4,7 @@ import { ConflictError, ForbiddenError, NotFoundError, RequestValidationError } 
 import { AuthCodeType, IAccount, IUser, } from "../../interfaces";
 import { Account, User } from "../../models";
 import { AuthCode } from "../../models/AuthCode";
-import { ResendCodeRequest, SignUpRequest, VerifyEmailRequest } from "../../requests/interface";
+import { ResendCodeRequest, SignInRequest, SignUpRequest, VerifyEmailRequest } from "../../requests/interface";
 import { EMAIL_TYPE } from "../../utils/helpers";
 import { TokenService } from "./token.service";
 
@@ -136,6 +136,37 @@ export class AuthService {
       user.password = undefined as any;
 
       return {user,token}
+    } catch (error) {
+      throw error
+    }
+  }
+
+  static signin = async (data:SignInRequest) => {
+    try {
+      const { email, password } = data;
+
+      const user = await User.findOne({email});
+      if(!user){
+        throw new NotFoundError('Account not found');
+      }
+
+      if(!user.isActive){
+        throw new ForbiddenError("Account has been deactiviated. Contact the support team for a resolution");
+      }
+
+      const isValidPassword = await user.comparePassword(password);
+      if(!isValidPassword){
+        throw new RequestValidationError("Invalid password/Password mismatch");
+      }
+
+      user.lastLogin = new Date();
+      await user.save();
+
+      const token = await TokenService.signToken(user._id.toString(), user.accountType);
+
+      user.password = undefined as any;
+
+      return {user,token, requiresVerification: !user.isEmailVerified}
     } catch (error) {
       throw error
     }

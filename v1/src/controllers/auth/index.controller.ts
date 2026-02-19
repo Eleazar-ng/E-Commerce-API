@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { AsyncHandler } from "../../requests/middleware";
-import { ResendCodeRequest, SignUpRequest, VerifyEmailRequest } from "../../requests/interface";
+import { ResendCodeRequest, SignInRequest, SignUpRequest, VerifyEmailRequest } from "../../requests/interface";
 import { AuthService } from "../../services";
 import { success } from "../../utils/helpers";
 
@@ -26,6 +26,14 @@ export class AuthController {
       const payload = request.body;
       const data = await AuthService.verifyEmail(payload);
       return success(response,`Email verified successfullty.`,data,201);
+    }
+  )
+
+  static signin = AsyncHandler(
+    async (request:Request<{},{},SignInRequest>, response:Response) => {
+      const payload = request.body;
+      const data = await AuthService.signin(payload);
+      return success(response,`Logged-In successfully`,data,201);
     }
   )
 }
