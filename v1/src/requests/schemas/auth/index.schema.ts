@@ -16,3 +16,15 @@ export const signupSchema = z.object({
   }).min(8, 'Password must be at least 8 characters').max(100, 'Password cannot exceed 100 characters')
   .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,'Password must contain at least one uppercase letter, one lowercase letter, and one number')
 })
+
+export const resendCodeSchema = z.object({
+  email: z.email('A valid email is required'),
+  type: z.enum(["email_verification", "password_reset"])
+})
+
+export const verifyEmailSchema = z.object({
+  email: z.email('A valid email is required'),
+  code: z.string({
+    error: "Verification code is required"
+  }).length(6, "Verification code must be 6 digits").regex(/^\d{6}$/, "Verification code must contain only digits")
+})

@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import { AsyncHandler } from "../../requests/middleware";
-import { SignUpRequest } from "../../requests/interface";
+import { ResendCodeRequest, SignUpRequest, VerifyEmailRequest } from "../../requests/interface";
 import { AuthService } from "../../services";
-import { success } from "../../utils/helpers/response.api";
+import { success } from "../../utils/helpers";
 
 export class AuthController {
   static signup = AsyncHandler(
@@ -10,6 +10,22 @@ export class AuthController {
       const payload = request.body;
       const data = await AuthService.signup(payload);
       return success(response,"Account created successfully. Kindly check your email for verification code",data,201);
+    }
+  )
+
+  static resendCode = AsyncHandler(
+    async (request:Request<{},{},ResendCodeRequest>, response:Response) => {
+      const payload = request.body;
+      const data = await AuthService.resendCode(payload);
+      return success(response,`Verification code sent to ${payload.email} successfullty.`,data,201);
+    }
+  )
+
+  static verifyEmail = AsyncHandler(
+    async (request:Request<{},{},VerifyEmailRequest>, response:Response) => {
+      const payload = request.body;
+      const data = await AuthService.verifyEmail(payload);
+      return success(response,`Email verified successfullty.`,data,201);
     }
   )
 }

@@ -43,6 +43,11 @@ const authCodeSchema = new Schema<IAuthCode>(
 authCodeSchema.index({ email: 1, type: 1 });
 authCodeSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
+// Methods
+authCodeSchema.methods.compareCode = async function(code: string): Promise<boolean> {
+  return await bcrypt.compare(code, this.code);
+};
+
 // Static methods
 authCodeSchema.statics.generateCode = function (): string {
   return Math.floor(100000 + Math.random() * 900000).toString();
