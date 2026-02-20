@@ -17,4 +17,9 @@ export class EmailService {
     this.eventEmitter.emit('sendWelcomeEmail', {mailOptions, type}); 
   }
 
+  sendPasswordResetEmail (mailOptions:any, type:string){
+    console.log(`Sending ${type} email to an existing user`); 
+    this.eventEmitter.emit('sendPasswordResetEmail', {mailOptions, type}); 
+  }
+
 }

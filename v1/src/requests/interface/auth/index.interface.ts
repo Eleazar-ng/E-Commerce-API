@@ -20,3 +20,13 @@ export interface SignInRequest {
   email: string;
   password: string;
 }
+
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface ResetPasswordRequest {
+  email: string;
+  code: string;
+  password: string;
+}

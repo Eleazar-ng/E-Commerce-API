@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { AsyncHandler } from "../../requests/middleware";
-import { ResendCodeRequest, SignInRequest, SignUpRequest, VerifyEmailRequest } from "../../requests/interface";
+import { ForgotPasswordRequest, ResendCodeRequest, ResetPasswordRequest, SignInRequest, SignUpRequest, VerifyEmailRequest } from "../../requests/interface";
 import { AuthService } from "../../services";
 import { success } from "../../utils/helpers";
 
@@ -34,6 +34,22 @@ export class AuthController {
       const payload = request.body;
       const data = await AuthService.signin(payload);
       return success(response,`Logged-In successfully`,data,201);
+    }
+  )
+
+  static forgotPassword = AsyncHandler(
+    async (request:Request<{},{},ForgotPasswordRequest>, response:Response) => {
+      const payload = request.body;
+      const data = await AuthService.forgotPassword(payload);
+      return success(response,`Password reset-code sent successfully`,data,201);
+    }
+  )
+
+  static resetPassword = AsyncHandler(
+    async (request:Request<{},{},ResetPasswordRequest>, response:Response) => {
+      const payload = request.body;
+      const data = await AuthService.resetPassword(payload);
+      return success(response,`Password reset successful`,data,201);
     }
   )
 }
