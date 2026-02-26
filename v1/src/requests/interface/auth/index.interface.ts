@@ -5,3 +5,28 @@ export interface SignUpRequest {
   email: string;
 	password: string;
 }
+
+export interface ResendCodeRequest {
+  email: string;
+  type: "email_verification" | "password_reset"
+}
+
+export interface VerifyEmailRequest {
+  email: string;
+  code: string;
+}
+
+export interface SignInRequest {
+  email: string;
+  password: string;
+}
+
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface ResetPasswordRequest {
+  email: string;
+  code: string;
+  password: string;
+}

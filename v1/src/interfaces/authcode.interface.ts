@@ -9,6 +9,8 @@ export interface IAuthCode extends Document {
   used: boolean;
   createdAt: Date;
   updatedAt: Date;
+
+  compareCode(code:string): Promise<boolean>
 }
 
 export type AuthCodeType = 'email_verification' | 'password_reset';

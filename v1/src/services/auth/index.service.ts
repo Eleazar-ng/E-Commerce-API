@@ -1,10 +1,12 @@
 import { emailService } from "../../config/event";
-import { verificationEmailOption } from "../../emails/mailOptions";
-import { ConflictError, ForbiddenError } from "../../errors";
+import { passwordResetEmailOption, verificationEmailOption, welcomeEmailOption } from "../../emails/mailOptions";
+import { ConflictError, ForbiddenError, NotFoundError, RequestValidationError } from "../../errors";
 import { AuthCodeType, IAccount, IUser, } from "../../interfaces";
 import { Account, User } from "../../models";
 import { AuthCode } from "../../models/AuthCode";
-import { SignUpRequest } from "../../requests/interface";
+import { ForgotPasswordRequest, ResendCodeRequest, ResetPasswordRequest, SignInRequest, SignUpRequest, VerifyEmailRequest } from "../../requests/interface";
+import { EMAIL_TYPE } from "../../utils/helpers";
+import { TokenService } from "./token.service";
 
 
 export class AuthService {
@@ -25,6 +27,11 @@ export class AuthService {
         const mailOptions = verificationEmailOption(email, firstName, code)
         emailService.sendEmailVerificationEmail(mailOptions, "EMAIL_VERIFICATION")
         break;
+
+      case "password_reset":
+        const mailOptions2 = passwordResetEmailOption(email, firstName, code)
+        emailService.sendPasswordResetEmail(mailOptions2, "PASSWORD_RESET")
+        break;  
       default:  
         throw new ForbiddenError("Invalid email type");
     }
@@ -52,6 +59,183 @@ export class AuthService {
       newUser.password = undefined as any;
 
       return newUser.email;
+    } catch (error) {
+      throw error
+    }
+  }
+
+  static resendCode = async (data:ResendCodeRequest) => {
+    try {
+      const { email, type } = data;
+
+      if(!EMAIL_TYPE.includes(type)){
+        throw new RequestValidationError("Invalid email type")
+      }
+
+      const user = await User.findOne({email});
+      if(!user){
+        throw new NotFoundError('Account not found');
+      }
+
+      if(type == "email_verification"){
+        if(user.isEmailVerified){
+          throw new ConflictError("Email is already verified")
+        }
+      }
+
+      await this.generateAndSendCode(user.email, user.firstName, type);
+
+      return user.email;
+    } catch (error) {
+      throw error
+    }
+  }
+
+  static verifyEmail = async (data:VerifyEmailRequest) => {
+    try {
+      const { email, code } = data;
+
+      const user = await User.findOne({email});
+      if(!user){
+        throw new NotFoundError('Account not found');
+      }
+
+      const authCode = await AuthCode.findOne({
+        email, type: "email_verification", used: false
+      });
+      if(!authCode){
+        throw new NotFoundError('Verfication code not found')
+      }
+
+      if(new Date() > authCode.expiresAt){
+        throw new ForbiddenError('Verification code has expired. Kindly request for a new code')
+      }
+
+      if(authCode.attempts < 5){
+        authCode.attempts += 1;
+        authCode.save();
+      }
+      
+      if(authCode.attempts >= 5){
+        throw new RequestValidationError("Too many attempts. Kindly request for a new code");
+      }
+
+      const isValidCode = await authCode.compareCode(code);
+      if(!isValidCode){
+        throw new RequestValidationError("Invalid verification code");
+      }
+
+      authCode.used = true;
+      await authCode.save();
+
+      user.isEmailVerified = true;
+      user.isActive = true;
+      await user.save();
+
+      //Send email
+      const mailOptions = welcomeEmailOption(user.email, user.firstName);
+      emailService.sendWelcomeEmail(mailOptions, "WELCOME_EMAIL");
+
+      const token = await TokenService.signToken(user._id.toString(), user.accountType);
+
+      user.password = undefined as any;
+
+      return {user,token}
+    } catch (error) {
+      throw error
+    }
+  }
+
+  static signin = async (data:SignInRequest) => {
+    try {
+      const { email, password } = data;
+
+      const user = await User.findOne({email});
+      if(!user){
+        throw new NotFoundError('Account not found');
+      }
+
+      // if(!user.isActive){
+      //   throw new ForbiddenError("Account has been deactiviated. Contact the support team for a resolution");
+      // }
+
+      const isValidPassword = await user.comparePassword(password);
+      if(!isValidPassword){
+        throw new RequestValidationError("Invalid password/Password mismatch");
+      }
+
+      user.lastLogin = new Date();
+      await user.save();
+
+      const token = await TokenService.signToken(user._id.toString(), user.accountType);
+
+      user.password = undefined as any;
+
+      return {user,token, requiresVerification: !user.isEmailVerified}
+    } catch (error) {
+      throw error
+    }
+  }
+
+  static forgotPassword = async (data:ForgotPasswordRequest) => {
+    try {
+      const { email } = data;
+
+      const user = await User.findOne({email});
+      if(!user){
+        throw new NotFoundError('Account not found');
+      }
+
+      await this.generateAndSendCode(email, user.firstName, "password_reset");
+
+      return user.email;
+    } catch (error) {
+      throw error
+    }
+  }
+
+  static resetPassword = async (data:ResetPasswordRequest) => {
+    try {
+      const { email, password, code } = data;
+
+      const user = await User.findOne({email});
+      if(!user){
+        throw new NotFoundError('Account not found');
+      }
+
+      const authCode = await AuthCode.findOne({
+        email, type: "password_reset", used: false
+      });
+      if(!authCode){
+        throw new NotFoundError('Verfication code not found')
+      }
+
+      if(new Date() > authCode.expiresAt){
+        throw new ForbiddenError('Verification code has expired. Kindly request for a new code')
+      }
+
+      if(authCode.attempts < 5){
+        authCode.attempts += 1;
+        authCode.save();
+      }
+      
+      if(authCode.attempts >= 5){
+        throw new RequestValidationError("Too many attempts. Kindly request for a new code");
+      }
+
+      const isValidCode = await authCode.compareCode(code);
+      if(!isValidCode){
+        throw new RequestValidationError("Invalid verification code");
+      }
+
+      authCode.used = true;
+      await authCode.save();
+
+      user.password = password;
+      user.passwordChangedAt = new Date();
+      await user.save();
+
+      return user.email;
     } catch (error) {
       throw error
     }

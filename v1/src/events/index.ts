@@ -24,12 +24,30 @@ export class EventHandlers {
         console.log('\x1b[32m' + `${type} email sent successfully` + '\x1b[0m')
         console.log(`${type} Info: `, data.id);
       }
-      // .then((data) => {
-      //   console.log(`${type} Email sent: `, data);
-      // })
-      // .catch((error) => {
-      // 
-      // })
+    })
+
+    this.eventEmitter.on('sendWelcomeEmail', async ({ mailOptions, type }) => {
+      console.log('Preparing to send email')
+      const { data, error } = await resend.emails.send(mailOptions)
+      if(error){
+        console.error('\x1b[31m' + `Email Error for ${type}: `, error)
+        console.log('\x1b[0m')
+      }else {
+        console.log('\x1b[32m' + `${type} email sent successfully` + '\x1b[0m')
+        console.log(`${type} Info: `, data.id);
+      }
+    })
+
+    this.eventEmitter.on('sendPasswordResetEmail', async ({ mailOptions, type }) => {
+      console.log('Preparing to send email')
+      const { data, error } = await resend.emails.send(mailOptions)
+      if(error){
+        console.error('\x1b[31m' + `Email Error for ${type}: `, error)
+        console.log('\x1b[0m')
+      }else {
+        console.log('\x1b[32m' + `${type} email sent successfully` + '\x1b[0m')
+        console.log(`${type} Info: `, data.id);
+      }
     })
 
     console.log('\x1b[32m' + 'Event handlers registered successfully' + '\x1b[0m')
