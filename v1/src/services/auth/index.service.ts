@@ -155,9 +155,9 @@ export class AuthService {
         throw new NotFoundError('Account not found');
       }
 
-      if(!user.isActive){
-        throw new ForbiddenError("Account has been deactiviated. Contact the support team for a resolution");
-      }
+      // if(!user.isActive){
+      //   throw new ForbiddenError("Account has been deactiviated. Contact the support team for a resolution");
+      // }
 
       const isValidPassword = await user.comparePassword(password);
       if(!isValidPassword){
