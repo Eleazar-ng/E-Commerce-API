@@ -6,3 +6,10 @@ export interface CreateProductRequest {
   stock: string;
   isFeatured: boolean;
 }
+
+export interface ProductRequest {
+  page: string;
+  limit: string;
+  sort: string;
+  search: string;
+}

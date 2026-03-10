@@ -30,13 +30,21 @@ export const createProductSchema = z.object({
       return { message: "Stock is required & must be a number"}
     }
   }),
-  // .int()
-  // .nonnegative('Stock must be a non-negative integer')
-  // .or(z.string().transform(val => parseInt(val))),
-    
-  // images: z.array(z.url('Invalid image URL'))
-  //   .min(1, 'At least one image is required')
-  //   .max(10, 'Maximum 10 images allowed'),
-    
+
   isFeatured: z.boolean().default(false)
+})
+
+export const productSchema = z.object({
+  page: z.coerce.number({
+    error: () => {
+      return { message: "Page must be a number"}
+    }
+  }).optional(),
+  limit: z.coerce.number({
+    error: () => {
+      return { message: "Limit must be a number"}
+    }
+  }).optional(),
+  sort: z.string().optional(),
+  search: z.string().optional()
 })
