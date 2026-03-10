@@ -1,6 +1,6 @@
-import { InternalServerError, RequestValidationError } from "../../../errors";
+import { InternalServerError, NotFoundError, RequestValidationError } from "../../../errors";
 import { Product } from "../../../models/Product";
-import { CreateProductRequest, ProductRequest } from "../../../requests/interface";
+import { CreateProductRequest, ProductRequest, ProductsRequest } from "../../../requests/interface";
 import { UploadService } from "./upload.service";
 
 export class ProductService {
@@ -35,7 +35,7 @@ export class ProductService {
     }
   }
 
-  static getAll = async (data:ProductRequest) => {
+  static getAll = async (data:ProductsRequest) => {
     try {
       const {page = 1, limit = 10, search, sort = "-createdAt"} = data;
 
@@ -65,6 +65,21 @@ export class ProductService {
         }
       }
 
+    } catch (error) {
+      throw error
+    }
+  }
+
+  static getOne = async (data:ProductRequest) => {
+    try {
+      const { id } = data;
+
+      const product = await Product.findById(id);
+      if (!product) {
+        throw new NotFoundError("Product not found");
+      }
+      
+      return product;
     } catch (error) {
       throw error
     }

@@ -29,12 +29,13 @@ export const createProductSchema = z.object({
     error: () => {
       return { message: "Stock is required & must be a number"}
     }
-  }),
+  })
+  .positive('Stock must be a positive number'),
 
   isFeatured: z.boolean().default(false)
 })
 
-export const productSchema = z.object({
+export const productsSchema = z.object({
   page: z.coerce.number({
     error: () => {
       return { message: "Page must be a number"}
@@ -47,4 +48,8 @@ export const productSchema = z.object({
   }).optional(),
   sort: z.string().optional(),
   search: z.string().optional()
+})
+
+export const productSchema = z.object({
+  id: z.string()
 })

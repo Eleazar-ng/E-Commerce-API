@@ -7,9 +7,13 @@ export interface CreateProductRequest {
   isFeatured: boolean;
 }
 
-export interface ProductRequest {
+export interface ProductsRequest {
   page: string;
   limit: string;
   sort: string;
   search: string;
+}
+
+export interface ProductRequest {
+  id: string;
 }

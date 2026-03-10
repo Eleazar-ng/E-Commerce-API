@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { validate, validateQuery } from "../../../requests/middleware";
-import { createProductSchema, productSchema } from "../../../requests/schemas";
+import { validate, validateParams, validateQuery } from "../../../requests/middleware";
+import { createProductSchema, productsSchema, productSchema } from "../../../requests/schemas";
 import { handleMulterError, uploadMultiple, validateImageCount } from "../../../utils/helpers";
 import { AdminProductController } from "../../../controllers";
 
@@ -15,8 +15,13 @@ router.post("/",
 );
 
 router.get("/",
-  validateQuery(productSchema),
+  validateQuery(productsSchema),
   AdminProductController.getAll
+)
+
+router.get("/:id",
+  validateParams(productSchema),
+  AdminProductController.getOne
 )
 
 export { router as AdminProducts }
