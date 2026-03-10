@@ -4,3 +4,4 @@ export * from "./schema.validate";
 export * from "./rate.limiter";
 export * from "./async.handler";
 export * from "./request.logger";
+export * from "./authenticate.token";

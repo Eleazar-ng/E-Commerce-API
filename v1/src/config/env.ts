@@ -14,7 +14,11 @@ const envSchema = z.object({
   JWT_EXPIRES_IN: z.string().default('1d'),
   APP_URL: z.string().max(8),
   RE_API_KEY: z.string().max(100),
-  EMAIL_SENDER: z.string().max(50)
+  EMAIL_SENDER: z.string().max(50),
+  CLOUDINARY_CLOUD_NAME: z.string().max(15),
+  CLOUDINARY_API_KEY: z.string().max(20),
+  CLOUDINARY_API_SECRET:  z.string().max(30),
+  CLOUDINARY_URL:  z.string().max(100)
 })
 
 export const env = envSchema.parse(process.env);

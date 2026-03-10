@@ -30,3 +30,9 @@ export interface ResetPasswordRequest {
   code: string;
   password: string;
 }
+
+export interface JwtPayload {
+  id: string;
+  email: string;
+  role: string;
+}
