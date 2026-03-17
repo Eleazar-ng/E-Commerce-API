@@ -29,4 +29,14 @@ export class AdminProductController {
       return success(response,`Product retrieved successfully`,data,200);
     }
   )
+
+  static update = AsyncHandler(
+    async (request:Request<ProductRequest,{},CreateProductRequest>, response:Response) => {
+      const params = request.params;
+      const payload = request.body;
+      const files = request.files;
+      const data = await ProductService.update(params, payload, files);
+      return success(response,`Product updated successfully`,data,201);
+    }
+  )
 }

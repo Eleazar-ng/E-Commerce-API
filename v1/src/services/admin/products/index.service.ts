@@ -84,4 +84,62 @@ export class ProductService {
       throw error
     }
   }
+
+  static update = async (params:ProductRequest, data:CreateProductRequest, files:any) => {
+    let uploadedImages = [] as any;
+    const images = files;
+    const {name, description, price, stock, isFeatured, category} = data;
+
+    try {
+      const { id } = params;
+
+      const product = await Product.findById(id);
+      if (!product) {
+        throw new NotFoundError("Product not found");
+      }
+
+      if(product.images.length < 5){
+        const validUploadCount = 5 - product.images.length;
+        if(images){
+          if(images.length > validUploadCount){
+            throw new RequestValidationError(`Exceeded product images limit. You only have ${validUploadCount} upload(s) left. To increase uploads count, kindly delete older images`)
+          }
+          images.splice(validUploadCount,);
+        }
+      }
+
+      // Handle new image uploads if necessary
+      try {
+        if(product.images.length < 5 && images.length > 0){
+          uploadedImages = await UploadService.uploadFiles(images);
+        }
+      } catch (error) {
+        console.error("Product-images upload error", error);
+        throw new InternalServerError('Failed to upload product images');
+      }
+
+      // Update product
+      try {
+        const updateProduct = await Product.findByIdAndUpdate(
+          product.id, 
+          {
+            name, description, category, isFeatured,
+            price: Number(price), stock: Number(stock),
+            images: [...product.images, ...uploadedImages]
+          },
+          {new: true, runValidators: true}
+      )
+        return updateProduct;
+      } catch (error) {
+        console.error("Product update error", error)
+        if(uploadedImages && uploadedImages.length > 0){
+          await UploadService.deleteFiles(uploadedImages)
+        }
+        throw error
+      }
+
+    } catch (error) {
+      throw error
+    }
+  }
 }

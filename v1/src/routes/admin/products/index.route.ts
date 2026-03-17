@@ -24,4 +24,12 @@ router.get("/:id",
   AdminProductController.getOne
 )
 
+router.put("/:id",
+  uploadMultiple.array('images', 5),
+  handleMulterError,
+  validateParams(productSchema),
+  validate(createProductSchema),
+  AdminProductController.update
+)
+
 export { router as AdminProducts }
