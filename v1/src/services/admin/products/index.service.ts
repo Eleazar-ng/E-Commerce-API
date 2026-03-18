@@ -1,6 +1,6 @@
 import { InternalServerError, NotFoundError, RequestValidationError } from "../../../errors";
 import { Product } from "../../../models/Product";
-import { CreateProductRequest, ProductRequest, ProductsRequest } from "../../../requests/interface";
+import { CreateProductRequest, ProductImageRequest, ProductRequest, ProductsRequest } from "../../../requests/interface";
 import { UploadService } from "./upload.service";
 
 export class ProductService {
@@ -138,6 +138,56 @@ export class ProductService {
         throw error
       }
 
+    } catch (error) {
+      throw error
+    }
+  }
+
+  static deleteImages = async (params:ProductRequest, data:ProductImageRequest,) => {
+    try {
+      const { id } = params;
+      const { ids } = data;
+
+      const product = await Product.findById(id);
+      if (!product) {
+        throw new NotFoundError("Product not found");
+      }
+
+      if(ids.length === 0){
+        throw new RequestValidationError("Product images cannot be empty. Add at least 1 product image to be deleted")
+      }
+
+      let images = [];
+      let publicIds = [];
+
+      for(const id of ids){
+        for(const image of product.images){
+          if(image._id.toString() === id){
+            images.push(image)
+            publicIds.push(image._id)
+          }
+        }
+      }
+
+      if(images && images.length > 0){
+        await UploadService.deleteFiles(images)
+      }else{
+        throw new NotFoundError("Could not find the images associated with this product");
+      }
+
+      const productImages = product.images.filter((image) => {
+        return !publicIds.includes(image._id);
+      })
+
+      await Product.findByIdAndUpdate(
+        product.id,
+        {
+          images: [...productImages]
+        },
+        {new: true, runValidators: true}
+      )
+
+      return true;
     } catch (error) {
       throw error
     }

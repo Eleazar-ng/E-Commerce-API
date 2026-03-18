@@ -53,3 +53,9 @@ export const productsSchema = z.object({
 export const productSchema = z.object({
   id: z.string()
 })
+
+export const productImagesSchema = z.object({
+  ids: z.array(z.string())
+  .min(1, "At least 1 product image is required")
+  .max(5, "Exceeded maximum of 5 images")
+})

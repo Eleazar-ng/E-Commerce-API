@@ -1,6 +1,7 @@
 import { Document, Types } from "mongoose";
 
 interface Image {
+  _id: Types.ObjectId;
   name: string;
   fileUrl: string;
   publicId: string;

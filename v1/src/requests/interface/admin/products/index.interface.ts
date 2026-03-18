@@ -17,3 +17,7 @@ export interface ProductsRequest {
 export interface ProductRequest {
   id: string;
 }
+
+export interface ProductImageRequest {
+  ids: string[];
+}

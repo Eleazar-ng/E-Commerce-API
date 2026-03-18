@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { validate, validateParams, validateQuery } from "../../../requests/middleware";
-import { createProductSchema, productsSchema, productSchema } from "../../../requests/schemas";
+import { createProductSchema, productsSchema, productSchema, productImagesSchema } from "../../../requests/schemas";
 import { handleMulterError, uploadMultiple, validateImageCount } from "../../../utils/helpers";
 import { AdminProductController } from "../../../controllers";
 
@@ -30,6 +30,12 @@ router.put("/:id",
   validateParams(productSchema),
   validate(createProductSchema),
   AdminProductController.update
+)
+
+router.patch("/:id/images/remove",
+  validateParams(productSchema),
+  validate(productImagesSchema),
+  AdminProductController.deleteImage
 )
 
 export { router as AdminProducts }
