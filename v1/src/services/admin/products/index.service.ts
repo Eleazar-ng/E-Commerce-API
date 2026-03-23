@@ -192,4 +192,25 @@ export class ProductService {
       throw error
     }
   }
+
+  static delete = async (params:ProductRequest) => {
+    try {
+      const { id } = params;
+
+      const product = await Product.findById(id);
+      if (!product) {
+        throw new NotFoundError("Product not found");
+      }
+
+      if(product.images.length > 0){
+        await UploadService.deleteFiles(product.images);
+      }
+
+      const deleteProduct = await Product.findByIdAndDelete(product.id);
+
+      return deleteProduct;
+    } catch (error) {
+      throw error
+    }
+  }
 }

@@ -48,4 +48,12 @@ export class AdminProductController {
       return success(response,`Product image(s) deleted successfully`,data,201);
     }
   )
+
+  static delete = AsyncHandler(
+    async (request:Request<ProductRequest,{},{},{}>, response:Response) => {
+      const params = request.params;
+      const data = await ProductService.delete(params);
+      return success(response,`Product deleted successfully`,data,204);
+    }
+  )
 }

@@ -38,4 +38,11 @@ router.patch("/:id/images/remove",
   AdminProductController.deleteImage
 )
 
+router.delete("/:id",
+  validateParams(productSchema),
+  AdminProductController.delete
+)
+
+
+
 export { router as AdminProducts }
