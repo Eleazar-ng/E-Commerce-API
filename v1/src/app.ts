@@ -1,6 +1,8 @@
 import express from 'express';
 import cors from "cors";
 import helmet from 'helmet';
+import compression from "compression";
+import expressMongoSanitize from '@exortek/express-mongo-sanitize';
 import { env } from './config/env';
 import { Routers } from './routes/index.route';
 import { ErrorHandler, rateLimiter, RequestLogger } from './requests/middleware';
@@ -24,7 +26,13 @@ eventHandler.registerEventHandlers()
 app.use(RequestLogger);
 
 app.use(express.json({ limit: '50kb' }));
-app.use(express.urlencoded({ extended: true, limit: '10kb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Data sanitization against NoSQL query injection
+app.use(expressMongoSanitize());
+
+// Compression
+app.use(compression());
 
 //Rate limiter
 app.use(rateLimiter);
